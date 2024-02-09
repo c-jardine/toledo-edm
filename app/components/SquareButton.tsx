@@ -56,7 +56,7 @@ export default function SquareButton({
           borderColor="$gray6"
         >
           <View
-            bg="#f4fa0f"
+            bg={props.disabled ? '$gray5' : "#f4fa0f"}
             w="100%"
             h="100%"
             borderRadius="$6"

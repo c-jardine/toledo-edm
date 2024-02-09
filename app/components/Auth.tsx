@@ -3,10 +3,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronRight, Lock, Mail } from "@tamagui/lucide-icons";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { Alert, AppState } from "react-native";
-import { Button, Text, View } from "tamagui";
+import {
+  Alert,
+  AppState
+} from "react-native";
+import { Button, Spinner, Text, View } from "tamagui";
 import z from "zod";
 import BackgroundImage from "./BackgroundImage";
+import DismissKeyboard from "./DismissKeyboard";
 import KeyboardAvoidingView from "./KeyboardAvoidingView";
 import ResponsiveLogo from "./ResponsiveLogo";
 import SquareButton from "./SquareButton";
@@ -64,75 +68,84 @@ export default function Auth() {
   }
 
   return (
-    <KeyboardAvoidingView>
-      <BackgroundImage />
+    <DismissKeyboard>
+      <KeyboardAvoidingView>
+        <BackgroundImage />
 
-      {/* Logo */}
-      <View h="50%" justifyContent="center">
-        <ResponsiveLogo />
-      </View>
-
-      <View gap={16} flex={1} px="$4">
-        <FormProvider {...form}>
-          <View gap={16}>
-            {/* Email input */}
-            <TextInput<AuthFormInput>
-              icon={Mail}
-              name="email"
-              inputProps={{
-                placeholder: "Email",
-                autoCapitalize: "none",
-                keyboardType: "email-address",
-              }}
-            />
-            {/* Password input */}
-            <TextInput<AuthFormInput>
-              icon={Lock}
-              name="password"
-              inputProps={{
-                placeholder: "Password",
-                secureTextEntry: true,
-                autoCapitalize: "none",
-              }}
-            />
-          </View>
-        </FormProvider>
-
-        {/* Sign in button */}
-        <View alignItems="flex-end">
-          <SquareButton onPress={form.handleSubmit(signInWithEmail)}>
-            <ChevronRight color="black" size="$2" strokeWidth={4} />
-          </SquareButton>
+        {/* Logo */}
+        <View h="50%" justifyContent="center">
+          <ResponsiveLogo />
         </View>
-      </View>
 
-      {/* Sign up button */}
-      <View
-        py="$8"
-        flexDirection="row"
-        justifyContent="center"
-        alignItems="center"
-        gap="$2"
-      >
-        <Text color="$whiteA11">Need an account?</Text>
-        <Button
-          unstyled
-          textProps={{
-            textTransform: "uppercase",
-            letterSpacing: 0.64,
-            fontSize: 16,
-            color: "#f4fa0f",
-          }}
-          disabled={
-            form.formState.isSubmitting ||
-            !form.formState.isDirty ||
-            !form.formState.isValid
-          }
-          onPress={form.handleSubmit(signUpWithEmail)}
+        <View gap={16} flex={1} px="$4">
+          <FormProvider {...form}>
+            <View gap={16}>
+              {/* Email input */}
+              <TextInput<AuthFormInput>
+                icon={Mail}
+                name="email"
+                inputProps={{
+                  placeholder: "Email",
+                  autoCapitalize: "none",
+                  keyboardType: "email-address",
+                }}
+              />
+              {/* Password input */}
+              <TextInput<AuthFormInput>
+                icon={Lock}
+                name="password"
+                inputProps={{
+                  placeholder: "Password",
+                  secureTextEntry: true,
+                  autoCapitalize: "none",
+                }}
+              />
+            </View>
+          </FormProvider>
+
+          {/* Sign in button */}
+          <View alignItems="flex-end">
+            <SquareButton
+              onPress={form.handleSubmit(signInWithEmail)}
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? (
+                <Spinner color="#f4fa0f" />
+              ) : (
+                <ChevronRight color="black" size="$2" strokeWidth={4} />
+              )}
+            </SquareButton>
+          </View>
+        </View>
+
+        {/* Sign up button */}
+        <View
+          py="$8"
+          flexDirection="row"
+          justifyContent="center"
+          alignItems="center"
+          gap="$2"
         >
-          Sign up
-        </Button>
-      </View>
-    </KeyboardAvoidingView>
+          <Text color="$whiteA11">Need an account?</Text>
+          <Button
+            unstyled
+            textProps={{
+              textTransform: "uppercase",
+              letterSpacing: 0.64,
+              fontSize: 16,
+              color: "#f4fa0f",
+            }}
+            disabled={
+              form.formState.isSubmitting ||
+              !form.formState.isDirty ||
+              !form.formState.isValid
+            }
+            onPress={form.handleSubmit(signUpWithEmail)}
+          >
+            Sign up
+          </Button>
+        </View>
+      </KeyboardAvoidingView>
+    </DismissKeyboard>
   );
 }
