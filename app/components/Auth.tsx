@@ -2,7 +2,7 @@ import { supabase } from "@/supabase";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronRight, Lock, Mail } from "@tamagui/lucide-icons";
 import React from "react";
-import { Controller, Path, useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { Alert, AppState } from "react-native";
 import { Button, Text, View } from "tamagui";
 import z from "zod";
@@ -35,7 +35,7 @@ AppState.addEventListener("change", (state) => {
 });
 
 export default function Auth() {
-  const { control, handleSubmit, formState } = useForm<AuthFormInput>({
+  const form = useForm<AuthFormInput>({
     mode: "onChange",
     resolver: zodResolver(authSchema),
   });
@@ -63,27 +63,6 @@ export default function Auth() {
       Alert.alert("Please check your inbox for email verification!");
   }
 
-  const getFieldStyles = (fieldName: Path<AuthFormInput>) => {
-    if (formState.dirtyFields[fieldName] && !formState.errors[fieldName]) {
-      return {
-        borderColor: "$green7",
-        backgroundColor: "rgba(57,108,77,0.15)",
-        iconColor: "$green7",
-      };
-    } else if (formState.errors[fieldName]) {
-      return {
-        borderColor: "$red7",
-        backgroundColor: "rgba(156,49,47,0.15)",
-        iconColor: "$red7",
-      };
-    }
-    return {
-      borderColor: "$whiteA6",
-      backgroundColor: "$blackA8",
-      iconColor: "$gray4",
-    };
-  };
-
   return (
     <KeyboardAvoidingView>
       <BackgroundImage />
@@ -94,79 +73,34 @@ export default function Auth() {
       </View>
 
       <View gap={16} flex={1} px="$4">
-        <View gap={16}>
-          {/* Email input */}
-          <View>
-            <View
-              position="absolute"
-              zIndex={1}
-              display="flex"
-              justifyContent="center"
-              pl="$4"
-              h="100%"
-              pointerEvents="none"
-            >
-              <Mail color={getFieldStyles("email").iconColor} />
-            </View>
-            <Controller
-              control={control}
+        <FormProvider {...form}>
+          <View gap={16}>
+            {/* Email input */}
+            <TextInput<AuthFormInput>
+              icon={Mail}
               name="email"
-              render={({ field: { value, onChange, onBlur } }) => (
-                <TextInput
-                  borderColor={getFieldStyles("email").borderColor}
-                  bg={getFieldStyles("email").backgroundColor}
-                  focusStyle={{
-                    borderColor: getFieldStyles("email").borderColor,
-                  }}
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  placeholder="Email"
-                  autoCapitalize={"none"}
-                  keyboardType="email-address"
-                />
-              )}
+              inputProps={{
+                placeholder: "Email",
+                autoCapitalize: "none",
+                keyboardType: "email-address",
+              }}
             />
-          </View>
-
-          {/* Password input */}
-          <View>
-            <View
-              position="absolute"
-              zIndex={1}
-              display="flex"
-              justifyContent="center"
-              pl="$4"
-              h="100%"
-              pointerEvents="none"
-            >
-              <Lock color={getFieldStyles("password").iconColor} />
-            </View>
-            <Controller
-              control={control}
+            {/* Password input */}
+            <TextInput<AuthFormInput>
+              icon={Lock}
               name="password"
-              render={({ field: { value, onChange, onBlur } }) => (
-                <TextInput
-                  borderColor={getFieldStyles("password").borderColor}
-                  focusStyle={{
-                    borderColor: getFieldStyles("password").borderColor,
-                  }}
-                  bg={getFieldStyles("password").backgroundColor}
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  placeholder="Password"
-                  secureTextEntry
-                  autoCapitalize={"none"}
-                />
-              )}
+              inputProps={{
+                placeholder: "Password",
+                secureTextEntry: true,
+                autoCapitalize: "none",
+              }}
             />
           </View>
-        </View>
+        </FormProvider>
 
         {/* Sign in button */}
         <View alignItems="flex-end">
-          <SquareButton onPress={handleSubmit(signInWithEmail)}>
+          <SquareButton onPress={form.handleSubmit(signInWithEmail)}>
             <ChevronRight color="black" size="$2" strokeWidth={4} />
           </SquareButton>
         </View>
@@ -190,9 +124,11 @@ export default function Auth() {
             color: "#f4fa0f",
           }}
           disabled={
-            formState.isSubmitting || !formState.isDirty || !formState.isValid
+            form.formState.isSubmitting ||
+            !form.formState.isDirty ||
+            !form.formState.isValid
           }
-          onPress={handleSubmit(signUpWithEmail)}
+          onPress={form.handleSubmit(signUpWithEmail)}
         >
           Sign up
         </Button>
